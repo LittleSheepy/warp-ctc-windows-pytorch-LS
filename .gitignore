@@ -1,3 +1,15 @@
 *~
 Makefile
 build
+.idea
+*.xml
+.idea/warp-ctc-windows-pytorch-LS.iml
+.idea/modules.xml
+.idea/misc.xml
+.idea/inspectionProfiles/profiles_settings.xml
+*.iml
+*.xml
+*.xml
+*.xml
+.idea/misc.xml
+.idea/workspace.xml

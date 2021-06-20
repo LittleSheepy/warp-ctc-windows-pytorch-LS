@@ -11,12 +11,14 @@ warp_ctc_path = "../build/Release"
 
 if platform.system() == 'Darwin':
     lib_ext = ".dylib"
-else:
+elif platform.system() == "Windows":
     lib_ext = ".dll"
+else:
+    lib_ext = ".so"
 
 if "WARP_CTC_PATH" in os.environ:
     warp_ctc_path = os.environ["WARP_CTC_PATH"]
-if not os.path.exists(os.path.join(warp_ctc_path, "warpctc.dll")):
+if not os.path.exists(os.path.join(warp_ctc_path, "warpctc" + lib_ext)):
     print(("Could not find libwarpctc.so in {}.\n"
            "Build warp-ctc and set WARP_CTC_PATH to the location of"
            " libwarpctc.so (default is '../build')").format(warp_ctc_path))

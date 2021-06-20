@@ -1,70 +1,97 @@
 # PyTorch bindings for Warp-ctc on windows
+
+在windows上编译部署成功了
+
+环境：
+
+python 3.8.8
+
+torch                   1.8.1+cu102
+
+setuptools              52.0.0.post20210125
+
+相对于项目https://gitee.com/zhangxilong191203/warp-ctc修改的地方:
+
+1.src/ctc_entrypoint.cu  把ctc_entrypoint.cpp 改为 #include "ctc_entrypoint.cpp"
+
+2.include/ctc.h 添加 __declspec(dllexport)
+
+原：
+```C++
+ctcStatus_t compute_ctc_loss(const float* const activations,
+                             float* gradients,
+                             const int* const flat_labels,
+                             const int* const label_lengths,
+```
+改为：
+```C++
+__declspec(dllexport) ctcStatus_t compute_ctc_loss(const float* const activations,
+                             float* gradients,
+                             const int* const flat_labels,
+                             const int* const label_lengths,
+```
+3.pytorch_binding/src/binding.cpp
+原：
+```C++
+extern THCState* state;
+```
+改为：
+```C++
+THCState *state = at::globalContext().lazyInitCUDA();
+```
+4.pytorch_binding/setup.py
+原：
+```python
+warp_ctc_path = "../build"
+
+if platform.system() == 'Darwin':
+    lib_ext = ".dylib"
+else:
+    lib_ext = ".so"
+
+if "WARP_CTC_PATH" in os.environ:
+    warp_ctc_path = os.environ["WARP_CTC_PATH"]
+if not os.path.exists(os.path.join(warp_ctc_path, "libwarpctc" + lib_ext)):
+    print(("Could not find libwarpctc.so in {}.\n"
+           "Build warp-ctc and set WARP_CTC_PATH to the location of"
+           " libwarpctc.so (default is '../build')").format(warp_ctc_path))
+    sys.exit(1)
+```
+改为：
+```python
+warp_ctc_path = "../build/Release"
+
+if platform.system() == 'Darwin':
+    lib_ext = ".dylib"
+elif platform.system() == "Windows":
+    lib_ext = ".dll"
+else:
+    lib_ext = ".so"
+    
+if "WARP_CTC_PATH" in os.environ:
+    warp_ctc_path = os.environ["WARP_CTC_PATH"]
+if not os.path.exists(os.path.join(warp_ctc_path, "warpctc" + lib_ext)):
+    print(("Could not find libwarpctc.so in {}.\n"
+           "Build warp-ctc and set WARP_CTC_PATH to the location of"
+           " libwarpctc.so (default is '../build')").format(warp_ctc_path))
+    sys.exit(1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 参考项目：
+
 https://github.com/SeanNaren/warp-ctc
 
 https://gitee.com/zhangxilong191203/warp-ctc
 
-[![Build Status](https://travis-ci.org/SeanNaren/warp-ctc.svg?branch=pytorch_bindings)](https://travis-ci.org/SeanNaren/warp-ctc)
-
-This is an extension onto the original repo found [here](https://github.com/baidu-research/warp-ctc).
-
-## Installation
-
-Install [PyTorch](https://github.com/pytorch/pytorch#installation) v0.4.
-
-`WARP_CTC_PATH` should be set to the location of a built WarpCTC
-(i.e. `libwarpctc.so`).  This defaults to `../build`, so from within a
-new warp-ctc clone you could build WarpCTC like this:
-
-```bash
-git clone https://github.com/SeanNaren/warp-ctc.git
-cd warp-ctc
-mkdir build; cd build
-cmake ..
-make
-```
-
-Now install the bindings:
-```bash
-cd pytorch_binding
-python setup.py install
-```
-
-If you try the above and get a dlopen error on OSX with anaconda3 (as recommended by pytorch):
-```bash
-cd ../pytorch_binding
-python setup.py install
-cd ../build
-cp libwarpctc.dylib /Users/$WHOAMI/anaconda3/lib
-```
-This will resolve the library not loaded error. This can be easily modified to work with other python installs if needed.
-
-Example to use the bindings below.
-
-```python
-import torch
-from warpctc_pytorch import CTCLoss
-ctc_loss = CTCLoss()
-# expected shape of seqLength x batchSize x alphabet_size
-probs = torch.FloatTensor([[[0.1, 0.6, 0.1, 0.1, 0.1], [0.1, 0.1, 0.6, 0.1, 0.1]]]).transpose(0, 1).contiguous()
-labels = torch.IntTensor([1, 2])
-label_sizes = torch.IntTensor([2])
-probs_sizes = torch.IntTensor([2])
-probs.requires_grad_(True)  # tells autograd to compute gradients for probs
-cost = ctc_loss(probs, labels, probs_sizes, label_sizes)
-cost.backward()
-```
-
-## Documentation
-
-```
-CTCLoss(size_average=False, length_average=False)
-    # size_average (bool): normalize the loss by the batch size (default: False)
-    # length_average (bool): normalize the loss by the total number of frames in the batch. If True, supersedes size_average (default: False)
-
-forward(acts, labels, act_lens, label_lens)
-    # acts: Tensor of (seqLength x batch x outputDim) containing output activations from network (before softmax)
-    # labels: 1 dimensional Tensor containing all the targets of the batch in one large sequence
-    # act_lens: Tensor of size (batch) containing size of each output sequence from the network
-    # label_lens: Tensor of (batch) containing label length of each example
-```
