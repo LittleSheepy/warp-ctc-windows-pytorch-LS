@@ -10,7 +10,7 @@ torch                   1.8.1+cu102
 
 setuptools              52.0.0.post20210125
 
-##  相对于项目https://gitee.com/zhangxilong191203/warp-ctc修改的地方:
+##  相对于项目https://gitee.com/zhangxilong191203/warp-ctc 修改的地方:
 1.src/ctc_entrypoint.cu  把ctc_entrypoint.cpp 改为 #include "ctc_entrypoint.cpp"
 
 2.include/ctc.h 添加 __declspec(dllexport)
