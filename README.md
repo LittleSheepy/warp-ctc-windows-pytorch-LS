@@ -10,7 +10,7 @@ torch                   1.8.1+cu102
 
 setuptools              52.0.0.post20210125
 
-##  相对于项目https://gitee.com/zhangxilong191203/warp-ctc 修改的地方:
+##  一、相对于项目https://gitee.com/zhangxilong191203/warp-ctc 修改的地方:
 1.src/ctc_entrypoint.cu  把ctc_entrypoint.cpp 改为 #include "ctc_entrypoint.cpp"
 
 2.include/ctc.h 添加 __declspec(dllexport)
@@ -76,7 +76,19 @@ if not os.path.exists(os.path.join(warp_ctc_path, "warpctc" + lib_ext)):
     sys.exit(1)
 ```
 
+## 二、安装
+1.编译 进入目录 warp-ctc-windows-pytorch-LS 执行：
+```bash
+mkdir build; cd build
+cmake ..
+make
+```
 
+2.安装
+```bash
+cd pytorch_binding
+python setup.py install
+```
 
 
 
