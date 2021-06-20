@@ -1,4 +1,7 @@
-# PyTorch bindings for Warp-ctc
+# PyTorch bindings for Warp-ctc on windows
+参考项目：
+https://github.com/SeanNaren/warp-ctc
+https://gitee.com/zhangxilong191203/warp-ctc
 
 [![Build Status](https://travis-ci.org/SeanNaren/warp-ctc.svg?branch=pytorch_bindings)](https://travis-ci.org/SeanNaren/warp-ctc)
 
